@@ -11,6 +11,7 @@ class BasicDriver : LinearOpMode() {
 
     override fun runOpMode() {
         robot = Robot(this)
+        robot.limelight.stop()
 
         waitForStart()
 
