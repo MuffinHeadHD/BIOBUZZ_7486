@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.GamepadState
 class RobotConfig {
 
     companion object{
-        
+
     }
 }
 
