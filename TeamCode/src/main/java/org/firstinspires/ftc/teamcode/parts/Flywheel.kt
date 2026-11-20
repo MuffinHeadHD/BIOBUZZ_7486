@@ -17,7 +17,7 @@ import kotlin.math.abs
 import kotlin.math.tan
 
 @Config
-class TurretConfig {
+class turretPID {
     companion object {
         @JvmField
         var kD_tt = 0.0010 // 0.0005
@@ -25,15 +25,27 @@ class TurretConfig {
         var kP_tt = 0.014 // 0.009
         @JvmField
         var kI_tt = 0.000001 // 0.000001
+        @JvmField
+        var kS_tt = 0.035
+        @JvmField
+        var kV_tt = 0.0
 
     }
 }
 
 class Flywheel(val limelight: Limelight3A, val turretTop: AxonServo, val flywheelMotor: DcMotorEx) : Updatable {
 
-    init {
-        turretMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        turretMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+
+    private var homePosition: Double = 0.7554545454545455
+
+    override fun update() {
+        turretTop.pid.kp = turretPID.kP_tt
+        turretTop.pid.ki = turretPID.kI_tt
+        turretTop.pid.kd = turretPID.kD_tt
+        turretTop.pid.ks = turretPID.kS_tt
+        turretTop.pid.kv = turretPID.kV_tt
+
+        turretTop.update()
     }
 
     var aimTagId: Int? = null
@@ -81,8 +93,6 @@ class Flywheel(val limelight: Limelight3A, val turretTop: AxonServo, val flywhee
 
 
     // ---------------------------------------------------------------------
-    private var spiking = false
-    private var spikeStartTime = 0L
 
     var dashboard: FtcDashboard = FtcDashboard.getInstance()
 
@@ -99,6 +109,15 @@ class Flywheel(val limelight: Limelight3A, val turretTop: AxonServo, val flywhee
         limelight.pipelineSwitch(PIPELINE_INDEX)
         limelight.start()
     }
+
+   /*
+   fun rotate(rotation: Int) {
+
+        val target = servo.targetPosition + (1.0/3.0 * rotation)
+        servo.targetPosition = (target % 1.0 + 1.0) % 1.0
+        lastRotateTimeMs = System.currentTimeMillis()
+    }
+    */
 
     fun homeBiased(offset: Int = 5) {
         homing = true
@@ -125,7 +144,7 @@ class Flywheel(val limelight: Limelight3A, val turretTop: AxonServo, val flywhee
         turretMotor.power = homePower
     }
 
-    override fun update() {
+   /* override fun update() {
         val now = System.nanoTime()
         val dt = (now - lastTime) / 1e9
         lastTime = now
